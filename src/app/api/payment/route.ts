@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     const isMonthly = frequency === "Monthly";
 
     // Create a Checkout Session (Embedded Mode)
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       ui_mode: "embedded",
 
       // 1. Define what we are selling (Dynamic Price)
