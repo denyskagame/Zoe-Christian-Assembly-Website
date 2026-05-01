@@ -9,6 +9,9 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "typegen:extract": "sanity schema extract --enforce-required-fields --path=./schema.json",
+    "typegen:generate": "sanity typegen generate",
+    "typegen": "npm run typegen:extract && npm run typegen:generate",
     "prepare": "husky"
   },
   "dependencies": {
