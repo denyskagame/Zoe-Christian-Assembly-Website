@@ -59,7 +59,7 @@ export function sanityEventToCalendarEvent(event: SanityEvent): CalendarEvent {
     time: `${event.startTime} - ${event.endTime}`,
     startTime: event.startTime,
     endTime: event.endTime,
-    location: event.isOnline ? "On Zoom" : event.location,
+    location: event.isOnline ? "On Zoom" : (event.location ?? ""),
     description: event.shortDescription || "",
     fullDescription: event.description,
     color: event.color || "#a5876d",

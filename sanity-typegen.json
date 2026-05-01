@@ -1,0 +1,7 @@
+{
+  "$schema": "https://www.sanity.io/schemas/sanity-typegen.json",
+  "path": "./src/**/*.{ts,tsx}",
+  "schema": "./schema.json",
+  "generates": "./src/sanity/sanity.types.ts",
+  "overloadClientMethods": true
+}

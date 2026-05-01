@@ -1,140 +1,100 @@
 import { groq } from "next-sanity";
 
-// Types for sermons
-export interface SanitySermon {
-  _id: string;
-  title: string;
-  preacher: string;
-  date: string;
-  youtubeUrl: string;
-  duration?: string;
-  type: string;
-  isPopular?: boolean;
-  description?: string;
-}
+// Re-export shared types so existing call sites (`@/sanity/lib/queries`) keep working.
+export type {
+  SanitySermon,
+  SanityEvent,
+  SanityAnnouncement,
+  SanityCampaign,
+  SanityGivingCategory,
+  SanityPage,
+  SanitySiteSettings,
+} from "../types";
 
-// Three latest sermons for the homepage section
+// ---------- Sermons ----------
+
+const sermonProjection = `
+  _id,
+  title,
+  preacher,
+  date,
+  scripture,
+  youtubeUrl,
+  duration,
+  type,
+  series,
+  isFeatured,
+  isPopular,
+  description,
+  thumbnail,
+  slug
+`;
+
 export const homepageSermonsQuery = groq`
   *[_type == "sermon"] | order(date desc)[0...3] {
-    _id,
-    title,
-    preacher,
-    date,
-    youtubeUrl,
-    duration,
-    type,
-    isPopular,
-    description
+    ${sermonProjection}
   }
 `;
 
-// Types for events
-export interface SanityEvent {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  date: string;
-  startTime: string;
-  endTime: string;
-  location: string;
-  isOnline: boolean;
-  zoomLink?: string;
-  color: string;
-  shortDescription?: string;
-  description?: unknown[];
-  image?: {
-    asset: {
-      _ref: string;
-      url: string;
-    };
-  };
-  featured: boolean;
-  published: boolean;
-}
+export const allSermonsQuery = groq`
+  *[_type == "sermon"] | order(date desc) {
+    ${sermonProjection}
+  }
+`;
 
-// Get all published events
+export const sermonBySlugQuery = groq`
+  *[_type == "sermon" && slug.current == $slug][0] {
+    ${sermonProjection}
+  }
+`;
+
+// ---------- Events ----------
+
+const eventProjection = `
+  _id,
+  title,
+  slug,
+  date,
+  startTime,
+  endTime,
+  location,
+  isOnline,
+  zoomLink,
+  category,
+  recurrence,
+  recurrenceEndDate,
+  color,
+  shortDescription,
+  description,
+  "image": image.asset->{ _ref, url },
+  featured,
+  published
+`;
+
 export const allEventsQuery = groq`
   *[_type == "event" && published == true] | order(date asc) {
-    _id,
-    title,
-    slug,
-    date,
-    startTime,
-    endTime,
-    location,
-    isOnline,
-    zoomLink,
-    color,
-    shortDescription,
-    description,
-    "image": image.asset->url,
-    featured,
-    published
+    ${eventProjection}
   }
 `;
 
-// Get upcoming events (from today onwards)
 export const upcomingEventsQuery = groq`
   *[_type == "event" && published == true && date >= $today] | order(date asc) {
-    _id,
-    title,
-    slug,
-    date,
-    startTime,
-    endTime,
-    location,
-    isOnline,
-    zoomLink,
-    color,
-    shortDescription,
-    description,
-    "image": image.asset->url,
-    featured,
-    published
+    ${eventProjection}
   }
 `;
 
-// Get the next upcoming event
 export const nextEventQuery = groq`
   *[_type == "event" && published == true && date >= $today] | order(date asc) [0] {
-    _id,
-    title,
-    slug,
-    date,
-    startTime,
-    endTime,
-    location,
-    isOnline,
-    zoomLink,
-    color,
-    shortDescription,
-    description,
-    "image": image.asset->url,
-    featured,
-    published
+    ${eventProjection}
   }
 `;
 
-// Get featured events
 export const featuredEventsQuery = groq`
   *[_type == "event" && published == true && featured == true && date >= $today] | order(date asc) {
-    _id,
-    title,
-    slug,
-    date,
-    startTime,
-    endTime,
-    location,
-    isOnline,
-    zoomLink,
-    color,
-    shortDescription,
-    "image": image.asset->url,
-    featured
+    ${eventProjection}
   }
 `;
 
-// Get events for a specific month
 export const eventsByMonthQuery = groq`
   *[_type == "event" && published == true && date >= $startDate && date <= $endDate] | order(date asc) {
     _id,
@@ -149,23 +109,103 @@ export const eventsByMonthQuery = groq`
   }
 `;
 
-// Get a single event by slug
 export const eventBySlugQuery = groq`
   *[_type == "event" && slug.current == $slug][0] {
+    ${eventProjection}
+  }
+`;
+
+// ---------- Announcements ----------
+
+export const activeAnnouncementsQuery = groq`
+  *[_type == "announcement"
+    && active == true
+    && (!defined(startDate) || startDate <= $today)
+    && (!defined(endDate) || endDate >= $today)
+  ] | order(_createdAt desc) {
     _id,
     title,
+    body,
+    active,
+    startDate,
+    endDate
+  }
+`;
+
+// ---------- Campaigns ----------
+
+const campaignProjection = `
+  _id,
+  title,
+  slug,
+  goalAmount,
+  coverImage,
+  description,
+  active
+`;
+
+export const activeCampaignsQuery = groq`
+  *[_type == "campaign" && active == true] | order(_createdAt desc) {
+    ${campaignProjection}
+  }
+`;
+
+export const campaignBySlugQuery = groq`
+  *[_type == "campaign" && slug.current == $slug][0] {
+    ${campaignProjection}
+  }
+`;
+
+// ---------- Giving categories ----------
+
+export const activeGivingCategoriesQuery = groq`
+  *[_type == "givingCategory" && active == true] | order(label asc) {
+    _id,
+    label,
     slug,
-    date,
-    startTime,
-    endTime,
-    location,
-    isOnline,
-    zoomLink,
-    color,
-    shortDescription,
-    description,
-    "image": image.asset->url,
-    featured,
-    published
+    active
+  }
+`;
+
+// ---------- Pages ----------
+
+const pageProjection = `
+  _id,
+  title,
+  slug,
+  body,
+  seoMetaDescription
+`;
+
+export const pageBySlugQuery = groq`
+  *[_type == "page" && slug.current == $slug][0] {
+    ${pageProjection}
+  }
+`;
+
+// ---------- Site settings ----------
+
+export const siteSettingsQuery = groq`
+  *[_type == "siteSettings" && _id == "siteSettings"][0] {
+    _id,
+    _type,
+    churchName,
+    address,
+    phone,
+    email,
+    serviceTimes,
+    socialLinks,
+    currentLivestreamId,
+    currentZoomLink,
+    givingMessage,
+    donationReceiptThankYouMessage,
+    charityRegistrationNumber,
+    charityLegalName,
+    charityAddressOnFile,
+    receiptIssuingCity,
+    receiptIssuingProvince,
+    authorizedSignatoryName,
+    authorizedSignatureImage,
+    receiptIssuingMode
   }
 `;
