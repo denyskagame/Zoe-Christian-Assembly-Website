@@ -110,20 +110,127 @@ export interface SanitySocialLink {
   url: string;
 }
 
+export interface SanityAddress {
+  street?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+  country?: string;
+}
+
+export interface SanityServiceTime {
+  _key: string;
+  label: string;
+  time: string;
+}
+
+export interface SanityImageWithAlt extends SanityImage {
+  alt?: string;
+}
+
+export interface SanityScriptureQuote {
+  text?: string;
+  reference?: string;
+}
+
+export interface SanityWelcomeStat {
+  _key: string;
+  value: string;
+  label: string;
+}
+
+export type WelcomeValueIcon = "book" | "users" | "globe" | "heart" | "cross" | "dove";
+
+export interface SanityWelcomeValue {
+  _key: string;
+  icon: WelcomeValueIcon;
+  title: string;
+  description: string;
+}
+
+export type RequestCardIcon = "users" | "praying-hands" | "chat" | "heart" | "book";
+
+export interface SanityRequestCard {
+  _key: string;
+  icon: RequestCardIcon;
+  title: string;
+  description: string;
+  ctaLabel: string;
+  ctaUrl: string;
+}
+
 export interface SanitySiteSettings {
   _id: "siteSettings";
   _type: "siteSettings";
+
+  // Church
   churchName: string;
-  address?: string;
+  address?: SanityAddress;
+  serviceTimes?: SanityServiceTime[];
+
+  // Contact
   phone?: string;
   email?: string;
-  serviceTimes?: string[];
   socialLinks?: SanitySocialLink[];
+
+  // Live
   currentLivestreamId?: string;
   currentZoomLink?: string;
+
+  // Hero
+  heroHeadline?: string;
+  heroEmphasisWord?: string;
+  heroBackgroundImage?: SanityImageWithAlt;
+  heroDecorativeImage?: SanityImageWithAlt;
+  heroPrimaryCtaLabel?: string;
+  heroPrimaryCtaUrl?: string;
+  heroSecondaryCtaLabel?: string;
+
+  // Service info card
+  serviceInfoHeading?: string;
+  serviceInfoDescription?: string;
+  serviceInfoFeatures?: string[];
+
+  // Welcome
+  welcomeHeadline?: string;
+  welcomeBody?: string;
+  welcomeQuote?: SanityScriptureQuote;
+  welcomeBackgroundImage?: SanityImageWithAlt;
+  welcomeFeatureImage?: SanityImageWithAlt;
+  welcomeStats?: SanityWelcomeStat[];
+  welcomeValues?: SanityWelcomeValue[];
+  welcomePrimaryCtaLabel?: string;
+  welcomePrimaryCtaUrl?: string;
+  welcomeSecondaryCtaLabel?: string;
+  welcomeSecondaryCtaUrl?: string;
+
+  // Requests
+  requestsBackgroundImage?: SanityImageWithAlt;
+  requestsHeading?: string;
+  requestsSubheading?: string;
+  requestCards?: SanityRequestCard[];
+
+  // Giving
+  givingHeading?: string;
+  givingDescription?: string;
   givingMessage?: string;
+  givingQuote?: SanityScriptureQuote;
+  givingPresetAmounts?: number[];
+  givingDefaultPreset?: number;
+  givingTrustSignals?: string[];
+  etransferEmail?: string;
   donationReceiptThankYouMessage?: string;
-  // Charity fields (Feature 10 dependency)
+
+  // Sermons
+  sermonsHeading?: string;
+  sermonsSubheading?: string;
+  youtubeChannelUrl?: string;
+
+  // Programs
+  programsHeading?: string;
+  programsSubheading?: string;
+
+  // Charity (Feature 10 dependency)
   charityRegistrationNumber?: string;
   charityLegalName?: string;
   charityAddressOnFile?: string;

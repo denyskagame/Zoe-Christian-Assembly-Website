@@ -1,16 +1,48 @@
-# Current Feature
+# Current Feature: Wire Homepage Sections to Sanity (Refactor)
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Add bullet points of what success looks like for the next feature -->
+- Expand the `siteSettings` singleton with ~30 new fields across 7 fieldsets: Hero, Service Info, Welcome, Requests, Giving, Sermons, Programs (every required field gets plain-English label + helper text + Sanity validation)
+- Convert `src/app/page.tsx` to a **server component** that fetches `siteSettings` (and any other needed Sanity data) once and passes it down. ISR with `revalidate: 60` so admin edits appear within a minute
+- Refactor each homepage section to a presentation component receiving its data via props (no hardcoded strings, hex codes, or external URLs in component files): `Hero`, `ServiceInfo`, `WelcomeSection`, `RequestsSection`, `GivingSection`, `ProgramsSection`, `SermonsSection`. IntersectionObserver / animation logic stays exactly as is
+- Migrate all images from hardcoded Cloudinary URLs to Sanity-uploaded images served via `urlFor()` from `src/sanity/lib/sanity.ts`. Update `next.config.ts` `remotePatterns` to allow `cdn.sanity.io`. Every Sanity image field has an `alt` text input
+- Migrate all hardcoded hex colors (`#303552`, `#a5876d`, `#ECECEC`) to Tailwind tokens (`zoe-navy`, `zoe-bronze`, `zoe-gray`) as each component is touched. New code must use the tokens
+- Replace SermonsSection's three eager iframes with a YouTube facade pattern (clickable thumbnail → load iframe on click). This is the biggest performance win
+- Fix `SermonsSection` card contrast: `bg-[#ececec]` → `bg-white` so cards stand out against the gray section background
+- Switch `GivingSection.handleGiveNow()` from `/donate?...` to `/give?...` (canonical route per spec)
+- `GivingSection` FUNDS dropdown fetches live from Sanity `givingCategory` documents (no hardcoded list)
+- `RequestsSection` CTAs use Sanity-configured `mailto:` links (Phase-1 fallback for `/connect`, `/prayer-request`, `/share-testimony` which don't exist as real pages yet)
+- Pastor can update every visible piece of homepage copy, every image, and every CTA from Sanity Studio without code changes
+- Homepage is pixel-identical to the current design when populated with the existing values
+- Sanity validation prevents publishing with empty required headlines / CTAs
+- Lighthouse Performance ≥ 90 on the homepage (was being dragged down by the 3 sermon iframes)
 
 ## Notes
 
-<!-- Add additional context, constraints, or details from the spec -->
+- **Refactor only.** No new sections, no design changes, no new pages. Visual output stays identical when fields are populated with current values.
+- **Feature 00 already shipped some of these fixes.** The history claims: Hero inline Arial removed (now uses `font-serif` Playfair), duplicate `<BackToTop />` removed from `page.tsx`, brand tokens defined in `tailwind.config.ts` and wired via `@config` in `globals.css`. **Verify each before re-doing** — if already correct, skip.
+- **Suggested implementation order** (per spec):
+  1. Expand the `siteSettings` schema first; verify the Studio loads, validates, and the admin can populate it.
+  2. Confirm Tailwind brand tokens exist and migrate hex codes incrementally (no separate color-migration PR).
+  3. Refactor sections one at a time, smallest first: `ServiceInfo` → `Hero` → `WelcomeSection` → `RequestsSection` → `GivingSection`.
+  4. Wire `SermonsSection` and `ProgramsSection` to real Sanity queries last; rebuild SermonsSection's media layer with the YouTube facade pattern.
+- **Server-component pattern.** Sections stay `"use client"` (IntersectionObserver requires it). `page.tsx` becomes a server component, calls `getSiteSettings()` and passes data down. This avoids client-side Sanity reads on the homepage and gives ISR caching for free.
+- **`@/sanity/lib/client` exists** from Feature 02 — `SermonsSection` already imports it. No need to recreate.
+- **ISR config:** `export const revalidate = 60` on `page.tsx`.
+- **Schema design:**
+  - All `welcome*` / `hero*` / `giving*` / `requests*` / `sermons*` / `programs*` headings get `Rule.required().min(10).max(120)` (or appropriate bounds) so the pastor can't publish empty.
+  - Image fields use `options: { hotspot: true }` and an `alt` text sub-field.
+  - Helper text on every field — e.g., `currentLivestreamId` already enforces ID-only; same UX bar everywhere.
+  - Replace existing `address: string` and `serviceTimes: string[]` with structured forms (`address: {street,city,province,postalCode,country}`, `serviceTimes: [{label,time}]`). This is a breaking schema change — coordinate with any existing data the pastor has typed in.
+  - Use icon enums (`book`/`users`/`globe`/`heart`/`cross`/`dove` for `welcomeValues`; `users`/`praying-hands`/`chat`/`heart`/`book` for `requestCards`) — render to a fixed icon map in component code.
+- **Welcome stats — open question.** Spec flags "3+ Years Ministry / 3 Countries Reached"-style numbers as easy to misinterpret and prone to going stale. Surface this for the pastor: keep with quarterly update commitment, or remove entirely. Section reads fine without.
+- **`requestCards` route fallback.** Pastor configures `mailto:info@zoechristianassembly.org?subject=...` URLs in Sanity. Real submission forms become a future phase if requested.
+- **Image migration order.** Pastor must upload current images into Sanity before component refactor lands, OR we ship the components reading from Sanity and the homepage is broken until images are uploaded. **Recommend** uploading first via Studio (the Site Settings doc), then merging the component refactors. Remove the Cloudinary `remotePatterns` entry only after every image is migrated.
+- **Out of scope:** real submission handling for connect / prayer / testimony, building any new sections, changing visual design, multi-language, member-account-gated content.
 
 ## History
 
