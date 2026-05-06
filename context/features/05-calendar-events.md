@@ -58,7 +58,7 @@ Edge case: if a recurring event needs to be cancelled for a specific week (e.g.,
 
 ## References
 
-- `@context/zoe-christian-assembly-overview.md`
+- `@context/zoe-overview.md`
 - `@features/02-sanity-cms.md`
 - `@features/03-public-pages.md`
 - FullCalendar React docs: https://fullcalendar.io/docs/react

@@ -62,6 +62,6 @@ Prefer `maxresdefault` and fall back to `hqdefault` on error.
 
 ## References
 
-- `@context/zoe-christian-assembly-overview.md`
+- `@context/zoe-overview.md`
 - `@features/02-sanity-cms.md`
 - `@features/03-public-pages.md`

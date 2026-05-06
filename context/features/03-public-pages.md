@@ -73,5 +73,5 @@ Ask the pastor for: existing logo, brand colors (if any), 5–10 photos of the c
 
 ## References
 
-- `@context/zoe-christian-assembly-overview.md`
+- `@context/zoe-overview.md`
 - `@features/02-sanity-cms.md`
