@@ -191,6 +191,7 @@ export const siteSettingsQuery = groq`
     _type,
     churchName,
     address,
+    mailingAddress,
     serviceTimes,
     phone,
     email,

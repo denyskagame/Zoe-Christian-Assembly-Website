@@ -1,12 +1,18 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useModal } from "@/contexts/ModalContext";
+import type { SanitySiteSettings } from "@/sanity/types";
 
-export function Navbar() {
+interface NavbarProps {
+  settings: SanitySiteSettings | null;
+}
+
+export function Navbar({ settings }: NavbarProps) {
+  const churchName = settings?.churchName ?? "Zoe Christian Assembly";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isTopBarVisible, setIsTopBarVisible] = useState(true);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -139,7 +145,7 @@ export function Navbar() {
                     English
                   </button>
                   <button className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-[#303552] uppercase transition-colors hover:bg-[#a5876d] hover:text-[#ECECEC]">
-                    Français
+                    FranÃ§ais
                   </button>
                 </div>
               </div>
@@ -167,7 +173,7 @@ export function Navbar() {
               >
                 <Image
                   src="https://res.cloudinary.com/dkvpqgkdr/image/upload/v1764097888/For_Website_Light_BG-01_janmev.png"
-                  alt="Zoe Christian Assembly"
+                  alt={`${churchName} logo`}
                   width={280}
                   height={100}
                   className="h-24 w-auto object-contain drop-shadow-sm transition-all duration-300 hover:drop-shadow-md"
