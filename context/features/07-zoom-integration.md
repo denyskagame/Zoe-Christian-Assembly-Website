@@ -55,7 +55,7 @@ Document these in the admin runbook. Don't try to enforce them from the website.
 
 ## References
 
-- `@context/zoe-christian-assembly-overview.md`
+- `@context/zoe-overview.md`
 - `@features/02-sanity-cms.md`
 - `@features/03-public-pages.md`
 - `@features/06-live-service.md`
