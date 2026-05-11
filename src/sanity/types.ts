@@ -166,6 +166,7 @@ export interface SanitySiteSettings {
   // Church
   churchName: string;
   address?: SanityAddress;
+  mailingAddress?: SanityAddress;
   serviceTimes?: SanityServiceTime[];
 
   // Contact

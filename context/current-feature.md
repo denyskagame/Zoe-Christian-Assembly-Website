@@ -1,16 +1,41 @@
-# Current Feature
+# Current Feature: Public Pages — Home, About, Beliefs, Ministries, Contact
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Add bullet points of what success looks like for the next feature -->
+- **Header + Footer driven by `siteSettings`** — `Navbar` and `Footer` pull `churchName`, `address`, `phone`, `email`, `socialLinks`, `serviceTimes` from Sanity (currently still hardcoded). Pastor changing a value in Studio reflects within 60 s.
+- **Active announcement banner on homepage** — render when at least one `announcement.active === true` exists (with `startDate <= today <= endDate` if set), disappear when none. Use existing `getActiveAnnouncements()` helper from `src/sanity/lib/sanity.ts`.
+- **`/about`** — new top-level route consuming Sanity `page` doc with slug `about`, rendering Portable Text. Existing `/about/our-staff`, `/about/our-story`, `/about/what-we-believe` sub-pages stay; `/about` becomes the parent that links to them.
+- **`/beliefs`** — new route consuming Sanity `page` doc with slug `beliefs`. Resolves the dangling `WelcomeSection` "What We Believe" CTA target.
+- **`/ministries`** — new route consuming Sanity `page` doc with slug `ministries`.
+- **`/contact` enhanced** — pulls address / phone / email / service times / social links from `siteSettings`; embedded Google Map (iframe, no API key) using the address from `siteSettings`; mailto: link instead of contact form.
+- **Per-page SEO metadata** — Next.js `metadata` export on every public page (title, description, OG image). Where Sanity has the content, the metadata is sourced from Sanity (e.g., `page.seoMetaDescription`, `siteSettings.churchName`).
+- **JSON-LD `Organization` schema** on homepage and `/contact`.
+- **`app/sitemap.ts` and `app/robots.ts`** — Next.js auto-generates `sitemap.xml` and `robots.txt`. Sitemap includes all public pages (homepage, about, beliefs, ministries, contact, plus the existing ones for sermons / events / give once those features ship).
+- **ISR `revalidate: 60`** on every public page server component, matching the homepage pattern from Feature 02b.
+- **All images use `<Image>`** with alt text — audit-and-fix any plain `<img>` in current public pages.
+- **Mobile-responsive at 320px / 768px / 1280px**; visible focus rings; semantic HTML.
+- **Lighthouse mobile per page:** Performance ≥ 90, Accessibility 100, SEO 100, Best Practices ≥ 95.
+- **WCAG AA contrast** verified across every page. LCP < 1.5 s on a fast connection.
 
 ## Notes
 
-<!-- Add additional context, constraints, or details from the spec -->
+- **Routing reality check.** The repo currently has `/about/our-staff`, `/about/our-story`, `/about/what-we-believe`, `/contact`, `/donate`, `/events`, `/kids`, `/prayer-request`, `/sermons`, `/share-testimony`, `/studio/[[...tool]]`, `/youth`. The spec wants new top-level `/about`, `/beliefs`, `/ministries`. **Recommendation:** create the three top-level pages without removing the existing sub-pages; the new `/about` becomes a hub that previews and links to its sub-pages. `/kids`, `/youth`, `/connect`, `/prayer-request`, `/share-testimony` are not in this spec — leave them alone.
+- **Announcement banner placement.** Default is a thin dismissible bar at the very top of the page (above the existing TopBar), tone `zoe-bronze` for visibility. Persisted dismissal uses `localStorage` keyed by announcement `_id` so a user only dismisses each one once.
+- **Page (Sanity) docs are required.** This feature renders `/about`, `/beliefs`, `/ministries` from Sanity `page` docs. The pastor must create three `page` docs with those slugs in Studio. Until then, each page should render a friendly "coming soon" fallback rather than 500 — match the resilience pattern Feature 02b established.
+- **Contact form.** Spec is explicit: don't build one in Phase 1. Use `mailto:<siteSettings.email>`. Already aligns with the Phase-1 RequestsSection pattern.
+- **Google Map embed.** Compose the URL from `siteSettings.address` parts: `https://www.google.com/maps/embed/v1/place?q=<urlencoded address>` doesn't need an API key for standard usage; alternative is `https://maps.google.com/maps?q=<address>&output=embed`. The latter is keyless and reliable; go with it. If `siteSettings.address` is incomplete, hide the map.
+- **JSON-LD Organization** can be a single React component that takes `siteSettings` and emits a `<script type="application/ld+json">` with `name`, `address`, `telephone`, `email`, `sameAs` (social links), `url`. Mounted on homepage + `/contact`.
+- **Per-page metadata API.** `app/<route>/page.tsx` exports `generateMetadata` (async if it needs Sanity) returning the `Metadata` object. Default OG image: pull from `siteSettings.heroBackgroundImage` resolved through `urlFor()`.
+- **Sitemap.** `app/sitemap.ts` returns an array of `MetadataRoute.Sitemap` entries. Hardcode the public route list; don't try to enumerate dynamic routes for this feature (sermons / events / campaigns sitemaps come with their respective features).
+- **`robots.ts`** — `Allow: /` everywhere except `/studio/*` (admin panel). Sitemap link points to `/sitemap.xml`.
+- **Distinct visual identity.** Spec calls out: avoid generic Tailwind starter aesthetics, generic stock photos, cliché church-site layout. The existing homepage already has a distinctive editorial feel from Feature 02b — propagate that to the about/beliefs/ministries Portable Text rendering (typography, generous spacing, real photos).
+- **Performance.** Spec warns to avoid client-side JS except the mobile menu. Existing sections are `"use client"` for `useScrollReveal`; new pages (`/about`, `/beliefs`, `/ministries`, `/contact`) should be **server components** with no client JS unless absolutely needed. Announcement banner is the one new client component (because of `localStorage` dismissal).
+- **WCAG AA.** Run `eslint-plugin-jsx-a11y` warnings if available, audit color contrast (the brand `zoe-bronze` / `zoe-navy` should already meet AA — verify on light backgrounds). All interactive elements need visible focus rings.
+- **Out of scope:** sermons listing (Feature 04), events/calendar listing (Feature 05), live page (Feature 06), give page (Feature 08), contact form, i18n, search, custom 404/500 pages (separate concern).
 
 ## History
 

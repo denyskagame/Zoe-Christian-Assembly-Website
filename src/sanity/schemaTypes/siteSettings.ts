@@ -135,6 +135,26 @@ export default defineType({
       ],
     }),
     defineField({
+      name: "mailingAddress",
+      title: "Mailing address (optional)",
+      type: "object",
+      description:
+        "Use this if mail goes to a different address than the church building (e.g., a P.O. box). Leave blank to show only the church address.",
+      fieldset: "church",
+      fields: [
+        defineField({ name: "street", title: "Street", type: "string" }),
+        defineField({ name: "city", title: "City", type: "string" }),
+        defineField({ name: "province", title: "Province / state", type: "string" }),
+        defineField({ name: "postalCode", title: "Postal code", type: "string" }),
+        defineField({
+          name: "country",
+          title: "Country",
+          type: "string",
+          initialValue: "Canada",
+        }),
+      ],
+    }),
+    defineField({
       name: "serviceTimes",
       title: "Service times",
       type: "array",
