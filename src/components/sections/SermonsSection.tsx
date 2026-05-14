@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Play } from "lucide-react";
 import { client } from "@/sanity/lib/client";
 import { homepageSermonsQuery, type SanitySermon } from "@/sanity/lib/queries";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { YouTubeEmbed } from "@/components/media/YouTubeEmbed";
 import type { SanitySiteSettings } from "@/sanity/types";
 
 const FALLBACK_HEADING = "Sermons & Podcasts";
@@ -13,69 +13,6 @@ const FALLBACK_CHANNEL_URL = "https://www.youtube.com/@ZoeChristianAssembly";
 
 interface SermonsSectionProps {
   settings: SanitySiteSettings | null;
-}
-
-function getYouTubeVideoId(url: string): string | null {
-  if (!url) return null;
-  const match = url.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{11})/
-  );
-  return match?.[1] ?? null;
-}
-
-function getYouTubeEmbedUrl(videoId: string): string {
-  return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-}
-
-function getYouTubeThumbnailUrl(videoId: string): string {
-  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-}
-
-/**
- * YouTube facade: renders a thumbnail until clicked, then swaps in the iframe.
- * Saves ~1.5MB of JS on initial homepage load when there are 3 sermons.
- */
-function YouTubeFacade({ url, title }: { url: string; title: string }) {
-  const [activated, setActivated] = useState(false);
-  const videoId = getYouTubeVideoId(url);
-
-  if (!videoId) {
-    return <div className="bg-zoe-navy/10 flex h-full w-full items-center justify-center" />;
-  }
-
-  if (activated) {
-    return (
-      <iframe
-        className="h-full w-full"
-        src={getYouTubeEmbedUrl(videoId)}
-        title={title}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => setActivated(true)}
-      aria-label={`Play ${title}`}
-      className="group relative h-full w-full cursor-pointer overflow-hidden bg-black"
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={getYouTubeThumbnailUrl(videoId)}
-        alt={title}
-        loading="lazy"
-        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-      />
-      <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition-colors group-hover:bg-black/50">
-        <div className="bg-zoe-bronze flex h-16 w-16 items-center justify-center rounded-full shadow-2xl transition-transform group-hover:scale-110">
-          <Play className="ml-1 h-8 w-8 fill-white text-white" />
-        </div>
-      </div>
-    </button>
-  );
 }
 
 export function SermonsSection({ settings }: SermonsSectionProps) {
@@ -184,7 +121,7 @@ export function SermonsSection({ settings }: SermonsSectionProps) {
               >
                 {/* Video facade — iframe loads only on click */}
                 <div className="aspect-video overflow-hidden">
-                  <YouTubeFacade url={sermon.youtubeUrl} title={sermon.title} />
+                  <YouTubeEmbed url={sermon.youtubeUrl} title={sermon.title} />
                 </div>
 
                 {/* Content */}
