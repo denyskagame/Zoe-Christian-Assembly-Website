@@ -153,7 +153,7 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 
 ## References
 
-- `@context/zoe-christian-assembly-overview.md`
+- `@context/zoe-overview.md`
 - `@features/02-sanity-cms.md`
 - `@features/03-public-pages.md`
 - `@features/09-email-resend.md`
